@@ -38,8 +38,8 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 ##################################################
 
 def load_trout():
-    file_path = path.relpath("c:/Users/ajmme/app3/Mike_Trout.json")
-    with open(file_path) as f:
+    # file_path = path.relpath("c:/Users/ajmme/app3/Mike_Trout.json")
+    with open("Mike_Trout.json") as f:
         data_str = f.read()
         data_trout = json.loads(data_str)    
     
