@@ -10,12 +10,15 @@ contourpy==1.0.7
 cycler==0.11.0
 decorator==5.1.1
 entrypoints==0.4
+Flask==2.2.3
+Flask-SQLAlchemy==3.0.3
 fonttools==4.39.3
 gitdb==4.0.10
 GitPython==3.1.31
 greenlet==2.0.2
 idna==3.4
 importlib-metadata==6.2.1
+itsdangerous==2.1.2
 Jinja2==3.1.2
 joblib==1.2.0
 jsonschema==4.17.3
@@ -47,7 +50,7 @@ scipy==1.10.1
 seaborn==0.12.2
 six==1.16.0
 smmap==5.0.0
-# SQLAlchemy==2.0.9
+SQLAlchemy==1.4.46
 streamlit==1.21.0
 streamlit-aggrid==0.3.4.post3
 threadpoolctl==3.1.0
@@ -60,4 +63,5 @@ tzlocal==4.3
 urllib3==1.26.15
 validators==0.20.0
 watchdog==3.0.0
+Werkzeug==2.2.3
 zipp==3.15.0
