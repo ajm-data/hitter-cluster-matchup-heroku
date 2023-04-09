@@ -13,7 +13,6 @@ from sklearn.metrics import classification_report, r2_score
 from sklearn import tree
 from sklearn import metrics
 
-from flask_sqlalchemy import SQLAlchemy
 
 from os import path
 
