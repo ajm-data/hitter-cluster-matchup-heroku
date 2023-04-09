@@ -47,7 +47,7 @@ scipy==1.10.1
 seaborn==0.12.2
 six==1.16.0
 smmap==5.0.0
-SQLAlchemy==2.0.9
+# SQLAlchemy==2.0.9
 streamlit==1.21.0
 streamlit-aggrid==0.3.4.post3
 threadpoolctl==3.1.0

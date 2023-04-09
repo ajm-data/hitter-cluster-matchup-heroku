@@ -13,6 +13,10 @@ from sklearn.metrics import classification_report, r2_score
 from sklearn import tree
 from sklearn import metrics
 
+from flask_sqlalchemy import SQLAlchemy
+
+from os import path
+
 import json
 
 import scipy.stats as stats
@@ -35,8 +39,8 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 ##################################################
 
 def load_trout():
-
-    with open('Mike_Trout.json') as f:
+    file_path = path.relpath("c:/Users/ajmme/app3/Mike_Trout.json")
+    with open(file_path) as f:
         data_str = f.read()
         data_trout = json.loads(data_str)    
     
@@ -62,19 +66,19 @@ df_trout = load_trout()
 ##################################################
 
 def load_metric_model():
-    file_metrics = 'kmeans_metric.sav'
+    file_metrics = 'c:/Users/ajmme/app3/kmeans_metric.sav'
     lmm = pickle.load(open(file_metrics, 'rb'))
     return lmm
 
 loaded_model = load_metric_model()
 
-##################################################
-##################################################
-# Read in clustered pitch metric csv: df_metric
-##################################################
+# ##################################################
+# ##################################################
+# # Read in clustered pitch metric csv: df_metric
+# ##################################################
 
 def get_metric_data():
-     metric = pd.read_csv("Named_Clustered_Metric.csv")
+     metric = pd.read_csv("c:/Users/ajmme/app3/Named_Clustered_Metric.csv")
      metric = metric.set_index("Unnamed: 0")
      metric_df = pd.DataFrame(metric)
      metric_df['full_name'] = metric_df['first_name'] + ' ' + metric_df['last_name']
@@ -85,14 +89,14 @@ def get_metric_data():
 df_metric = get_metric_data()
 
 
-##################################################
-##################################################
-# Partition visualization header into 2 columns : col_viz
-##################################################
+# ##################################################
+# ##################################################
+# # Partition visualization header into 2 columns : col_viz
+# ##################################################
 
 # @st.cache_resource
 def data_2_cols():
-     col1, col2 = st.columns([10, 8])
+     col1, col2 = st.columns(2)
      
      metric_cols = df_metric.columns 
 
@@ -126,7 +130,7 @@ def data_2_cols():
 
          st.header('Classification Accuracy')
         
-         st.dataframe(eval_metric[['precision','f1-score']],325,400)
+         st.dataframe(eval_metric[['precision','f1-score']],400,400)
          st.text('''Refresh page for different data splits 
         resulting in different f1-scores''')
      
@@ -140,11 +144,21 @@ col_viz = data_2_cols()
 
 def show_clusters():
 
-    df_trout = load_trout()
-    df_metric = get_metric_data()
+    # df_trout = load_trout()
+    # df_metric = get_metric_data()
 
-    cluster_query = "SELECT metric.Cluster, t.pitcher, ab, h, hr, avg, bb, so, obp FROM df_trout AS t LEFT JOIN df_metric AS metric ON metric.full_name = t.pitcher WHERE Cluster IS NOT NULL ORDER BY ab DESC"
-    trout_clusters = pd.DataFrame(ps.sqldf(cluster_query, locals()))
+    pyqldf = lambda q: sqldf(q, globals())
+
+    cluster_query = """SELECT metric.Cluster, t.pitcher, ab, h, hr, avg, bb, so, obp 
+        FROM df_trout AS t 
+        LEFT JOIN df_metric AS metric 
+        ON metric.full_name = t.pitcher 
+        WHERE Cluster IS NOT NULL 
+        ORDER BY ab DESC"""
+    
+    # trout_clusters = pd.DataFrame(ps.sqldf(cluster_query, locals()))
+
+    trout_clusters = pyqldf(cluster_query)
 
     trout_agg_sum = trout_clusters.groupby('Cluster').sum()
     trout_agg_sum['avg'] = trout_agg_sum['h'] / trout_agg_sum['ab']
@@ -195,11 +209,11 @@ def show_clusters():
 # show_clusters()
 
 # 329 hits in 1139 ab 
-trout_agg_sum = show_clusters()
+
 
 def density():
 
-
+    trout_agg_sum = show_clusters()
 
     # trout_agg_sum = show_clusters()
     
