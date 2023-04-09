@@ -65,7 +65,7 @@ df_trout = load_trout()
 ##################################################
 
 def load_metric_model():
-    file_metrics = 'c:/Users/ajmme/app3/kmeans_metric.sav'
+    file_metrics = 'kmeans_metric.sav'
     lmm = pickle.load(open(file_metrics, 'rb'))
     return lmm
 
@@ -77,7 +77,7 @@ loaded_model = load_metric_model()
 # ##################################################
 
 def get_metric_data():
-     metric = pd.read_csv("c:/Users/ajmme/app3/Named_Clustered_Metric.csv")
+     metric = pd.read_csv("Named_Clustered_Metric.csv")
      metric = metric.set_index("Unnamed: 0")
      metric_df = pd.DataFrame(metric)
      metric_df['full_name'] = metric_df['first_name'] + ' ' + metric_df['last_name']
