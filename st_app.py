@@ -19,7 +19,7 @@ from os import path
 import json
 
 import scipy.stats as stats
-from scipy.stats import binom, binom_test
+from scipy.stats import binom, binom_test, binomtest
 from scipy.stats import distributions as dist
 from scipy.stats import beta
 
@@ -29,24 +29,34 @@ from pandasql import sqldf
 from st_aggrid import AgGrid
 
 
-
-# Web-app title
+#################
+# Web-app title #
+#################
 st.markdown("<h1 style='text-align: center; color: red;'>Batter vs Clustered Pitchers</h1>", unsafe_allow_html=True)
 st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch metric data from BaseballSavant, a KMeans Clustering model is used to accurately group pitchers. Then we compare Batter statistics vs each cluster to gain insight into pitcher preferences and predict future outcomes.  </h4>", unsafe_allow_html=True)
-##################################################
-# Mike Trout vs Pitcher Career Numbers : df_trout
-##################################################
-hitters = ['Shohei_Ohtani', 'Mike_Trout', 'Gio_Urshela', 'Hunter_Renfroe']
+
+
+#####################
+# Hitter Select Box #
+#####################
+hitters = ['Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe']
 hitter_choose = st.selectbox('Choose Batter', hitters)
+
+########################
+# Open Selected Hitter #
+########################
+def open_hitter():
+    with open(f"{hitter_choose}.json") as f:
+        data_str = f.read()
+        data_hitter = json.loads(data_str)  
+    return data_hitter
 
 
 def load_hitter():
-    # file_path = path.relpath("c:/Users/ajmme/app3/Mike_Trout.json")
-    with open(f"{hitter_choose}.json") as f:
-        data_str = f.read()
-        data_hitter = json.loads(data_str)    
     
+    data_hitter = open_hitter()
     hitter = pd.DataFrame(data_hitter)
+
     hitter_cols = ['pitcher','pitcherFirstName', 'pitcherLastName',
             'ab', 'h', 'avg', 'hr', 'so', 'bb', '2b', '3b', 
             'obp', 'slg', 'ops']
@@ -62,10 +72,9 @@ def load_hitter():
 
 df_hitter = load_hitter()
 
-##################################################
-##################################################
+####################################################
 # Load KMeans Clustering Model : loaded_metric_model
-##################################################
+####################################################
 
 def load_metric_model():
     file_metrics = 'kmeans_metric.sav'
@@ -75,8 +84,7 @@ def load_metric_model():
 loaded_model = load_metric_model()
 
 # ##################################################
-# ##################################################
-# # Read in clustered pitch metric csv: df_metric
+# Read in clustered pitch metric csv: df_metric ####
 # ##################################################
 
 def get_metric_data():
@@ -91,63 +99,10 @@ def get_metric_data():
 df_metric = get_metric_data()
 
 
-# ##################################################
-# ##################################################
-# # Partition visualization header into 2 columns : col_viz
-# ##################################################
-
-# @st.cache_resource
-# def data_2_cols():
-#      tab1, tab2 = st.tabs(['Cluster Distribution', 'Model Precision'])
-     
-#      metric_cols = df_metric.columns 
-
-#     #  with col1:
-#     #     # viz_cols = df_metric.columns
-#     #     # viz_cole = metric_cols[0:55]
-#     #     st.header('These are the predictors used for our KMeans model')
-#     #     st.write(metric_cols[0:55])
-
-#      with tab1:
-#         st.header('Distribution of Clusters')
-#         cluster_distribution = plt.figure(figsize=(10, 10))
-#         sns.set(font_scale = 2)
-#         sns.countplot(x='Cluster', data=df_metric, palette ='deep').set(title='Pitcher Clusters')
-#         st.pyplot(cluster_distribution)
-     
-#      with tab2: 
-#         #  df_metric_tab3_columns = df_metric.columns
-#          metric_col3_columns = metric_cols[0:56]
-#          df_col3 = df_metric[metric_col3_columns]
-#          X_metric = df_col3.drop(['Cluster'],axis=1)
-#          y_metric= df_col3[['Cluster']]
-#          X_train_metric, X_test_metric, y_train_metric, y_test_metric =train_test_split(X_metric, y_metric, test_size=0.3)
-         
-#          kmeans_cluster_metric= DecisionTreeClassifier(criterion="entropy")
-#          kmeans_cluster_metric.fit(X_train_metric, y_train_metric)
-#          y_pred_metric = kmeans_cluster_metric.predict(X_test_metric)
-#          tested_metric = loaded_model.predict(X_test_metric)
-#          eval_metric = classification_report(y_test_metric, y_pred_metric, output_dict=True) 
-#          eval_metric = pd.DataFrame(eval_metric).T
-
-#          st.header('Classification Accuracy')
-        
-#          st.dataframe(eval_metric[['precision','f1-score']],400,400)
-#          st.text('''Refresh page for different data splits 
-#         resulting in different f1-scores''')
-     
-#      return tab1, tab2 
-
-# col_viz = data_2_cols()
-
-# tvs_clusters = trout_view_sum.index
-
-# cluster = st.selectbox('Choose Cluster', tvs_clusters)
 
 def show_clusters():
 
-    # df_trout = load_trout()
-    # df_metric = get_metric_data()
+    probable_cluster = 4
 
     pyqldf = lambda q: sqldf(q, globals())
 
@@ -158,28 +113,22 @@ def show_clusters():
         WHERE Cluster IS NOT NULL 
         ORDER BY ab DESC"""
     
-    # trout_clusters = pd.DataFrame(ps.sqldf(cluster_query, locals()))
 
     hitter_clusters = pyqldf(cluster_query)
 
     hitter_agg_sum = hitter_clusters.groupby('Cluster').sum()
     hitter_agg_sum['avg'] = hitter_agg_sum['h'] / hitter_agg_sum['ab']
 
-    # tvs_clusters = trout_agg_sum.index
 
-    # cluster = st.selectbox('Choose Cluster', tvs_clusters)
-
-    tab21, tab22 = st.tabs(['Career vs Pitcher', 'Career vs Cluster'])
+    tab21, tab22, tab23 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search'])
 
 
     with tab21:
         st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs pitchers in each cluster</h4>", unsafe_allow_html=True)
-        # tvs_clusters = trout_view_sum.index
-        # tvs_clusters = trout_clusters['Cluster']
+        st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
 
-        # cluster = st.selectbox('Choose Cluster', tvs_clusters)
-        # pitcher_cluster_view = trout_clusters.iloc[[tvs_clusters]]
-        st.dataframe(hitter_clusters)
+        AgGrid(hitter_clusters, height=350, fit_columns_on_grid_load=True)
+        
         st.markdown("<p style='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
 
         # AgGrid(trout_clusters)
@@ -197,27 +146,37 @@ def show_clusters():
         # trout_agg_sum = trout_clusters.groupby('Cluster').sum()
         # trout_agg_sum['avg'] = trout_agg_sum['h'] / trout_agg_sum['ab']
 
-
-        # tr_slg = trout_clusters[['slg', 'ops']].mean()
-        # st.dataframe(tr_slg, 325,400)
-        # trout_agg_sum['ops'] = trout_agg_sum['ops'] / trout_agg_sum['ab']
-
         st.dataframe(hitter_agg_sum)
         st.markdown("<p style='text-align: center; color: black;'>Sort columns by left-click</p>", unsafe_allow_html=True)
 
+    with tab23:
+        # icon("search")
+        # selected = st.text_input("", "Search...")
+        # button_clicked = st.button("OK")
+        # pitcher_last_name = st.text_input('Search by last name', 'pitcher')
+        
+        all_pitchers = pd.read_csv('Named_Clustered_Metric.csv')
+        all_pitchers_df = pd.DataFrame(all_pitchers)
+        all_pitchers_df = all_pitchers_df[['Cluster', 'last_name', 'first_name']]
+        
+        st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
+        AgGrid(all_pitchers_df, height=350, fit_columns_on_grid_load=True)
+
+    # with tab24: 
+    #     cum_hitters = pd.DataFrame()
+    #     for name in hitters:
+    #         cum_hitters = cum_hitters.append(name)
+    #     st.dataframe(cum_hitters)
 
     return hitter_agg_sum
 
-# show_clusters()
 
-# 329 hits in 1139 ab 
 
 
 def density():
 
     hitter_agg_sum = show_clusters()
 
-    # hitter_agg_sum = show_clusters()
     
     st.header('Bayesian Updated Batting Avg vs Cluster')
 
@@ -239,8 +198,7 @@ def density():
     a = (total_hit - cluster_hit)
     b = (total_ab - cluster_ab) - (total_hit - cluster_hit)
 
-    # a = 124
-    # b = 438 - 124
+
     # X_outcome = clustered_outcome_df.drop(['Cluster'],axis=1)
     theta_range = np.linspace(0, 1, 1000)
     theta_range_e = theta_range + 0.001 
@@ -251,16 +209,7 @@ def density():
     small_size = 8
     med_size = 14
     large_size = 22
-    # st.write(cluster_spec_view)
-    # st.write(a, b)
 
-    # plt.rc('font', size=SMALL_SIZE)          # controls default text sizes
-    # plt.rc('axes', titlesize=SMALL_SIZE)     # fontsize of the axes title
-    # plt.rc('axes', labelsize=MEDIUM_SIZE)    # fontsize of the x and y labels
-    # plt.rc('xtick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-    # plt.rc('ytick', labelsize=SMALL_SIZE)    # fontsize of the tick labels
-    # plt.rc('legend', fontsize=SMALL_SIZE)    # legend fontsize
-    # plt.rc('figure', titlesize=BIGGER_SIZE)  # fontsize of the figure title
     
     plt.rc('axes', labelsize=6)
     plt.rc('xtick', labelsize=med_size) 
