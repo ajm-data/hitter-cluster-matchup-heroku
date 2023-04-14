@@ -51,7 +51,9 @@ def open_hitter():
         data_hitter = json.loads(data_str)  
     return data_hitter
 
-
+########################
+# Load Selected Hitter #
+########################
 def load_hitter():
     
     data_hitter = open_hitter()
@@ -99,7 +101,9 @@ def get_metric_data():
 df_metric = get_metric_data()
 
 
-
+# ##################################
+# Aggregate hitter vs cluster data #
+# ##################################
 def show_clusters():
 
     probable_cluster = 4
@@ -120,7 +124,7 @@ def show_clusters():
     hitter_agg_sum['avg'] = hitter_agg_sum['h'] / hitter_agg_sum['ab']
 
 
-    tab21, tab22, tab23 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search'])
+    tab21, tab22, tab23, tab24 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search', 'Probable Pitcher'])
 
 
     with tab21:
@@ -130,21 +134,9 @@ def show_clusters():
         AgGrid(hitter_clusters, height=350, fit_columns_on_grid_load=True)
         
         st.markdown("<p style='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
-
-        # AgGrid(trout_clusters)
-        # cluster = st.selectbox('Choose Cluster', tvs_clusters)
-    # df_trout = load_trout()
-    # df_metric = get_metric_data()
-
-        # cluster_query = "SELECT metric.Cluster, t.pitcher, ab, h, hr, avg, bb, so, obp FROM df_trout AS t LEFT JOIN df_metric AS metric ON metric.full_name = t.pitcher WHERE Cluster IS NOT NULL ORDER BY ab DESC"
-        # trout_clusters = pd.DataFrame(ps.sqldf(cluster_query, locals()))
-        # st.write(pitcher_cluster_view, 325, 400)
-
     
     with tab22:
         st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs each cluster</h4>", unsafe_allow_html=True)
-        # trout_agg_sum = trout_clusters.groupby('Cluster').sum()
-        # trout_agg_sum['avg'] = trout_agg_sum['h'] / trout_agg_sum['ab']
 
         st.dataframe(hitter_agg_sum)
         st.markdown("<p style='text-align: center; color: black;'>Sort columns by left-click</p>", unsafe_allow_html=True)
@@ -157,21 +149,31 @@ def show_clusters():
         
         all_pitchers = pd.read_csv('Named_Clustered_Metric.csv')
         all_pitchers_df = pd.DataFrame(all_pitchers)
-        all_pitchers_df = all_pitchers_df[['Cluster', 'last_name', 'first_name']]
+        all_pitchers_df['full_name'] = all_pitchers_df['first_name'] + ' ' + all_pitchers_df['last_name']
+        all_pitchers_df['full_name'] = all_pitchers_df['full_name'].str.strip()
+
+        all_pitchers_df = all_pitchers_df[['Cluster', 'full_name']]
         
         st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
         AgGrid(all_pitchers_df, height=350, fit_columns_on_grid_load=True)
 
-    # with tab24: 
-    #     cum_hitters = pd.DataFrame()
-    #     for name in hitters:
-    #         cum_hitters = cum_hitters.append(name)
-    #     st.dataframe(cum_hitters)
+    with tab24: 
+        st.write("These are upcoming pitchers, their cluster, and the hitter's stats vs their cluster")
+        from new import prob_pitch_df
+        pp = prob_pitch_df()
+        
+        xtry = pd.merge(pp, hitter_agg_sum, left_on='Cluster', right_index=True)
+        st.dataframe(xtry)
+
+
 
     return hitter_agg_sum
 
 
 
+# ##################################################
+#       Plot Batting Average Distributions      ####
+# ##################################################
 
 def density():
 
@@ -235,19 +237,20 @@ def density():
     # st.pyplot(axes)
 
     # likelihood = stats.binom.pmf(k = cluster_hit, n = cluster_ab, p = theta_range)
+    # st.text(cluster_ab[0])
+    # st.text(type(cluster_hit))
+    a1 = a
+    b1 = b + a
+    p1 = a1/b1
 
-    # a1 = a
-    # b1 = b + a
-    # p1 = a1/b1
-
-    # # pval = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p1, alternative='less')
-    # # pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
-    # # pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
-    # pval = binom_test(cluster_hit, cluster_ab, p=p1, alternative='less')
-    # pval300 = binom_test(cluster_hit, cluster_ab, p=.3, alternative='less')
-    # pval333 = binom_test(cluster_hit, cluster_ab, p=.333, alternative='less')
-    # st.write(f"The probability that Trout's avg vs this cluster is greater than his season avg of .281 is:  {round(pval, 4)*100}%")
-    # st.write(f"The probability that Trout's avg vs this cluster is greater than 333 is: {round(pval333, 4)*100}%")
+    # pval = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p1, alternative='less')
+    # pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
+    # pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
+    # pval = binom_test(a1, b1, p=p1, alternative='less')
+    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
+    pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 300 is:  {round(pval300, 4)*100}%")
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 333 is: {round(pval333, 4)*100}%")
     # # st.write(cluster_hit[0], cluster_ab[0])
 density()
 
@@ -296,3 +299,9 @@ density()
 
 # col_viz = data_2_cols()
 
+
+from new import prob_pitch
+
+prob_pitch()
+
+# st.write(probable_pitcher)
