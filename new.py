@@ -1,6 +1,7 @@
 import statsapi
 import pandas as pd
-
+import datetime
+from datetime import date, datetime, timedelta
 
 # sched = statsapi.schedule(start_date='04/13/2023',end_date='04/29/2023',team=108)
 
@@ -13,7 +14,18 @@ all_pitchers_df = all_pitchers_df[['Cluster', 'full_name']]
 
 
 def prob_pitch():
-    sched = statsapi.schedule(start_date='04/13/2023',end_date='04/29/2023',team=108)
+    # date handling
+    date_interval = timedelta(days=5)
+    x_current_date = date.today()
+    x_end_date = x_current_date + date_interval
+
+    current_date = "%s/%s/%s" % (x_current_date.month, x_current_date.day, x_current_date.year)
+    end_date = "%s/%s/%s" % (x_end_date.month, x_end_date.day, x_end_date.year)
+
+
+    # future_date = todays_date + datetime.timedelta(days=5)
+    
+    sched = statsapi.schedule(start_date=current_date,end_date=end_date,team=108)
     probable_pitcher = []
     angels_pitcher = []
     opposing_pitcher = []
@@ -34,10 +46,12 @@ def prob_pitch():
                 angels_pitcher.append(sched[i]['away_probable_pitcher'])
                 
             # probable_pitcher.append(sched[i]['home_probable_pitcher'])
-
+        print(sched[i])
     for j in opposing_pitcher:
         pp_ospc = all_pitchers_df.loc[all_pitchers_df['full_name']== j, 'Cluster'].iloc[0]
         opposing_pitcher_cluster.append(pp_ospc)   
+
+    
 
     return game_date, opposing_pitcher, opposing_pitcher_cluster
 
@@ -52,6 +66,7 @@ def prob_pitch_df():
     return pp_df 
 
 
+print(prob_pitch())
 
 
 # def prob_pitch_cluster():
