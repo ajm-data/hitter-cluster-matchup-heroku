@@ -13,6 +13,7 @@ from sklearn.metrics import classification_report, r2_score
 from sklearn import tree
 from sklearn import metrics
 
+import statsapi
 
 from os import path
 
@@ -133,7 +134,7 @@ def show_clusters():
 
         AgGrid(hitter_clusters, height=350, fit_columns_on_grid_load=True)
         
-        st.markdown("<p style='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
+        st.markdown("<pstyl e='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
     
     with tab22:
         st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs each cluster</h4>", unsafe_allow_html=True)
@@ -177,21 +178,21 @@ def show_clusters():
 
 def density():
 
-    hitter_agg_sum = show_clusters()
+    hitter_agg = show_clusters()
 
     
     st.header('Bayesian Updated Batting Avg vs Cluster')
 
-    clusters = hitter_agg_sum.index
+    clusters = hitter_agg.index
 
     clusters_choose = st.selectbox('Choose Cluster', clusters)
 
-    cluster_spec_view = hitter_agg_sum.iloc[[clusters_choose]]
+    cluster_spec_view = hitter_agg.iloc[[clusters_choose]]
 
-    # dropped_agg_sum = hitter_agg_sum.drop([[clusters_choose]])
+    # dropped_agg_sum = hitter_agg.drop([[clusters_choose]])
 
-    total_ab = hitter_agg_sum['ab'].sum()
-    total_hit = hitter_agg_sum['h'].sum()
+    total_ab = hitter_agg['ab'].sum()
+    total_hit = hitter_agg['h'].sum()
 
     cluster_ab = cluster_spec_view['ab']
     cluster_hit = cluster_spec_view['h']
@@ -300,8 +301,8 @@ density()
 # col_viz = data_2_cols()
 
 
-from new import prob_pitch
+# from new import prob_pitch
 
-prob_pitch()
+# prob_pitch()
 
 # st.write(probable_pitcher)

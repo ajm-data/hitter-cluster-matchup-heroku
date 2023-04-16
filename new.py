@@ -46,10 +46,10 @@ def prob_pitch():
                 angels_pitcher.append(sched[i]['away_probable_pitcher'])
                 
             # probable_pitcher.append(sched[i]['home_probable_pitcher'])
-        print(sched[i])
-    for j in opposing_pitcher:
-        pp_ospc = all_pitchers_df.loc[all_pitchers_df['full_name']== j, 'Cluster'].iloc[0]
-        opposing_pitcher_cluster.append(pp_ospc)   
+        # print(sched[i])
+    # for j in opposing_pitcher:
+    #     pp_ospc = all_pitchers_df.loc[all_pitchers_df['full_name']== j, 'Cluster']
+    #     opposing_pitcher_cluster.append(pp_ospc)   
 
     
 
@@ -58,15 +58,32 @@ def prob_pitch():
 def prob_pitch_df():
 
     probable_pitchers = prob_pitch()
+
+    # for i in probable_pitchers:
+    #     if isinstance(i, str):
+    #         probable_pitchers
     prob_pitcher_df = pd.DataFrame(probable_pitchers)
 
     pp_df = prob_pitcher_df.T
-    pp_df.columns = ['date', 'Opponent SP', 'Cluster']
+    pp_df.columns = ['date', 'full_name', 'Cluster']
 
-    return pp_df 
+    
+    plm = pd.merge(pp_df, all_pitchers_df, on='full_name')
+
+    plm = plm.rename(columns={'Cluster_y':'Cluster'})
+    plm = plm.drop(columns='Cluster_x')
+    
+    # pp_ospc = all_pitchers_df.loc[all_pitchers_df['full_name']== pp_df['Opponent SP'], 'Cluster']
+    # print(type(pp_ospc))
+    return plm
 
 
-print(prob_pitch())
+x = prob_pitch_df()
+print(x)
+
+
+
+# print(prob_pitch())
 
 
 # def prob_pitch_cluster():
