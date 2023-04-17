@@ -12,6 +12,13 @@ all_pitchers_df['full_name'] = all_pitchers_df['full_name'].str.strip()
 
 all_pitchers_df = all_pitchers_df[['Cluster', 'full_name']]
 
+    # date handling
+date_interval = timedelta(days=5)
+x_current_date = date.today()
+x_end_date = x_current_date + date_interval
+
+current_date = "%s/%s/%s" % (x_current_date.month, x_current_date.day, x_current_date.year)
+end_date = "%s/%s/%s" % (x_end_date.month, x_end_date.day, x_end_date.year)
 
 def prob_pitch():
     # date handling
@@ -32,6 +39,7 @@ def prob_pitch():
     game_date = []
     opposing_pitcher_cluster = []
     opposing_team = []
+    gameId = {}
 
     for i in range(0, len(sched)):
         if (sched[i]['home_probable_pitcher']=='') or (sched[i]['away_probable_pitcher']==''):
@@ -50,8 +58,6 @@ def prob_pitch():
     # for j in opposing_pitcher:
     #     pp_ospc = all_pitchers_df.loc[all_pitchers_df['full_name']== j, 'Cluster']
     #     opposing_pitcher_cluster.append(pp_ospc)   
-
-    
 
     return game_date, opposing_pitcher, opposing_pitcher_cluster
 
@@ -78,8 +84,34 @@ def prob_pitch_df():
     return plm
 
 
-x = prob_pitch_df()
-print(x)
+def live_box():
+    gameId = {}
+    tod = statsapi.schedule(start_date=current_date,team=108)
+    for d in tod:
+        for key in d:
+            # print(f"{key}:{d[key]}")
+            gameId[key] = d[key]
+    
+    game_id = gameId['game_id']
+
+    bx_d = statsapi.boxscore_data(game_id)
+
+    angels = bx_d['awayBatters']
+
+    angels_df = pd.DataFrame([angels][0])
+
+    adf_col = ['namefield', 'ab', 'h', 'r', 'hr', 'rbi', 'obp', 'slg','personId']
+    angels_df = angels_df[adf_col]
+
+    return angels_df
+
+
+
+xlv = live_box()
+print(xlv)
+# x = prob_pitch_df()
+# print(x)
+
 
 
 

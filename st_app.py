@@ -125,7 +125,7 @@ def show_clusters():
     hitter_agg_sum['avg'] = hitter_agg_sum['h'] / hitter_agg_sum['ab']
 
 
-    tab21, tab22, tab23, tab24 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search', 'Probable Pitcher'])
+    tab21, tab22, tab23, tab24, tab25 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search', 'Probable Pitcher', 'Live'])
 
 
     with tab21:
@@ -166,6 +166,10 @@ def show_clusters():
         xtry = pd.merge(pp, hitter_agg_sum, left_on='Cluster', right_index=True)
         st.dataframe(xtry)
 
+    with tab25:
+        from new import live_box
+        lb = live_box()
+        st.dataframe(lb)
 
 
     return hitter_agg_sum
@@ -234,25 +238,16 @@ def density():
     st.text(f"His batting average estimate (season avg) prior is: {np.argmax(prior)}")
     st.text(f"The maximum likehood estimate for batting average vs the chosen cluster is: {np.argmax(likelihood)}")
     st.text(f"His batting average estimate vs this cluster given data is: {np.argmax(posterior)}")
-    # st.pyplot(fig)
-    # st.pyplot(axes)
 
-    # likelihood = stats.binom.pmf(k = cluster_hit, n = cluster_ab, p = theta_range)
-    # st.text(cluster_ab[0])
-    # st.text(type(cluster_hit))
     a1 = a
     b1 = b + a
     p1 = a1/b1
 
-    # pval = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p1, alternative='less')
-    # pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
-    # pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
-    # pval = binom_test(a1, b1, p=p1, alternative='less')
+
     pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
     pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
     st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 300 is:  {round(pval300, 4)*100}%")
     st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 333 is: {round(pval333, 4)*100}%")
-    # # st.write(cluster_hit[0], cluster_ab[0])
 density()
 
 
