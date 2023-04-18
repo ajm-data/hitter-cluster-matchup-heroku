@@ -40,7 +40,7 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 #####################
 # Hitter Select Box #
 #####################
-hitters = ['Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe']
+hitters = ['Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
 hitter_choose = st.selectbox('Choose Batter', hitters)
 
 ########################
@@ -167,9 +167,10 @@ def show_clusters():
         st.dataframe(xtry)
 
     with tab25:
-        from new import live_box
-        lb = live_box()
-        st.dataframe(lb)
+        # from new import live_box
+        # lb = live_box()
+        st.text('If box-score is empty, no game is currently underway')
+        # st.dataframe(lb)
 
 
     return hitter_agg_sum
@@ -243,11 +244,16 @@ def density():
     b1 = b + a
     p1 = a1/b1
 
+    p25 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1.1
+    p50 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1.2
 
-    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
-    pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.333, alternative='less')
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 300 is:  {round(pval300, 4)*100}%")
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 333 is: {round(pval333, 4)*100}%")
+
+
+
+    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p25, alternative='less')
+    pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p50, alternative='less')
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(p25*1000,0)} is:  {round(pval300, 4)*100}%")
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(p50*1000,0)} is: {round(pval333, 4)*100}%")
 density()
 
 
