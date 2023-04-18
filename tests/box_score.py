@@ -1,6 +1,7 @@
 import statsapi
 import pandas as pd
 import numpy as np
+from datetime import date
 
 
 bx_dict = statsapi.boxscore_data(718614)
@@ -64,7 +65,8 @@ df_homePitchers = pd.DataFrame([bx_homePitchers][0])
 df_homePitchers.rename(columns=df_homePitchers.iloc[0], inplace=True)
 df_homePitchers.drop([0], inplace=True)
 df_homePitchers.rename(columns={0:'id', '':'note'}, inplace=True)
-print(df_homePitchers)
+# print(df_homePitchers)
+
 """
          namefield   ip  h  r  er  bb  k  hr   era   p   s                name  personId      note
 0   Angels Pitchers   IP  H  R  ER  BB  K  HR   ERA   P   S  Nationals Pitchers         0
@@ -73,15 +75,8 @@ print(df_homePitchers)
 3   Estévez  (S, 1)  1.0  0  0   0   1  0   0  1.80  17  11             Estévez    608032    (S, 1)
 
 """
-# print(df.columns)
 
-# print(type(bx_df))
-# print(bx_df.columns)
-# print(bx_df['playerInfo'][0])
-
-# print(df.columns)
-# df.rename(columns=df.iloc[0], inplace = True)
-# df.drop([0], inplace = True)
-# print(df.head())
-# for i,j in enumerate(df.columns):
-#     print(i, j)
+# print(date.today())
+# print(datetime.strftime)
+fdate = date.today().strftime('%m/%d/%Y')
+print(fdate)
