@@ -38,16 +38,34 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 
 
 #####################
-# Hitter Select Box #
+# Hitter Select Box # ////// needs to be a function
 #####################
-hitters = ['Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
-hitter_choose = st.selectbox('Choose Batter', hitters)
+import re
+
+team_path = r"C:/Users/ajmme/OneDrive/Desktop/get_baseball/teams/LAA/raw_json/"
+hitters_new = []
+import os
+for filename in os.listdir(team_path):
+#    with open(os.path.join(team_path, filename), 'r') as f: # open in readonly mode
+    sp = filename.split('.')
+    hitters_new.append(sp[0])
+
+      # do your stuff
+#     sp = file.split('.')
+#     hitters_new.append(sp[0])
+
+# st.write(hitters_new)
+
+hitters = ['Jacob_Lamb','Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
+hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 ########################
 # Open Selected Hitter #
 ########################
+
+
 def open_hitter():
-    with open(f"{hitter_choose}.json") as f:
+    with open(f"{team_path}{hitter_choose}.json") as f:
         data_str = f.read()
         data_hitter = json.loads(data_str)  
     return data_hitter
