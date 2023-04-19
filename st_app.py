@@ -43,7 +43,7 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 #####################
 import re
 
-team_path = r"C:/Users/ajmme/OneDrive/Desktop/get_baseball/teams/LAA/raw_json/"
+team_path = "C:/Users/ajmme/app3/teams/LAA/hitter_vs_pitcher/"
 hitters_new = []
 import os
 for filename in os.listdir(team_path):
