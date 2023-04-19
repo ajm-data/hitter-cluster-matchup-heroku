@@ -38,7 +38,8 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 
 
 #####################
-# Hitter Select Box # ////// needs to be a function
+# Hitter Select Box # ////// needs to be a function with selecting a team
+# /// would like to order select box by hitter ab totals on the year
 #####################
 import re
 

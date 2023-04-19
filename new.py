@@ -107,14 +107,16 @@ def live_box():
 
 
 
-xlv = live_box()
-print(xlv)
-# x = prob_pitch_df()
+# xlv = live_box()
+# print(xlv)
+# x = prob_pitch()
 # print(x)
 
+# x = statsapi.schedule(start_date='4/19/2023',end_date='4/25/2023',team=108)
+# print(x[3]['away_probable_pitcher'])
 
-
-
+xydf = prob_pitch()
+print(xydf)
 # print(prob_pitch())
 
 
