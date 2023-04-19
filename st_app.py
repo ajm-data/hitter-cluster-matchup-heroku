@@ -167,10 +167,10 @@ def show_clusters():
         st.dataframe(xtry)
 
     with tab25:
-        # from new import live_box
-        # lb = live_box()
+        from new import live_box
+        lb = live_box()
         st.text('If box-score is empty, no game is currently underway')
-        # st.dataframe(lb)
+        st.dataframe(lb)
 
 
     return hitter_agg_sum

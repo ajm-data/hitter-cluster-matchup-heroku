@@ -27,6 +27,7 @@ markdown-it-py==2.2.0
 MarkupSafe==2.1.2
 matplotlib==3.7.1
 mdurl==0.1.2
+MLB-StatsAPI==1.6.1
 numpy==1.24.2
 packaging==23.0
 pandas==1.5.3
