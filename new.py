@@ -42,7 +42,7 @@ def prob_pitch():
     gameId = {}
 
     for i in range(0, len(sched)):
-        if (sched[i]['home_probable_pitcher']=='') or (sched[i]['away_probable_pitcher']==''):
+        if (sched[i]['home_probable_pitcher']=='') and (sched[i]['away_probable_pitcher']==''):
             break
         else:
             game_date.append(sched[i]['game_date'])
