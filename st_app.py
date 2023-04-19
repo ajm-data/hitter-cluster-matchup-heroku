@@ -42,8 +42,12 @@ st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch 
 # /// would like to order select box by hitter ab totals on the year
 #####################
 import re
+import os
 
-team_path = "C:/Users/ajmme/app3/teams/LAA/hitter_vs_pitcher/"
+team_path = os.path.normpath("teams/LAA/hitter_vs_pitcher/")
+
+# team_path = os.path.abspath("teams/LAA/hitter_vs_pitcher/")
+# team_path = "C:/Users/ajmme/app3/teams/LAA/hitter_vs_pitcher/"
 hitters_new = []
 import os
 for filename in os.listdir(team_path):
@@ -57,7 +61,7 @@ for filename in os.listdir(team_path):
 
 # st.write(hitters_new)
 
-hitters = ['Jacob_Lamb','Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
+# hitters = ['Jacob_Lamb','Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
 hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 ########################
@@ -66,7 +70,7 @@ hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 
 def open_hitter():
-    with open(f"{team_path}{hitter_choose}.json") as f:
+    with open(f"{team_path}/{hitter_choose}.json") as f:
         data_str = f.read()
         data_hitter = json.loads(data_str)  
     return data_hitter
@@ -97,9 +101,10 @@ df_hitter = load_hitter()
 ####################################################
 # Load KMeans Clustering Model : loaded_metric_model
 ####################################################
-
+models_path = os.path.normpath("models/")
 def load_metric_model():
-    file_metrics = 'kmeans_metric.sav'
+    file_metrics = f"{models_path}/kmeans_metric.sav"
+    print(file_metrics)
     lmm = pickle.load(open(file_metrics, 'rb'))
     return lmm
 
