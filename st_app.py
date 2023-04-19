@@ -29,39 +29,47 @@ from pandasql import sqldf
 
 from st_aggrid import AgGrid
 
+import re
+import os
 
 #################
 # Web-app title #
 #################
-st.markdown("<h1 style='text-align: center; color: red;'>Batter vs Clustered Pitchers</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: black;'>Using advanced pitch metric data from BaseballSavant, a KMeans Clustering model is used to accurately group pitchers. Then we compare Batter statistics vs each cluster to gain insight into pitcher preferences and predict future outcomes.  </h4>", unsafe_allow_html=True)
+st.set_page_config(page_title="Hitter vs Cluster", layout='wide')
+
+
+st.markdown("<h1 style='text-align: center; color: black;'>Batter vs Clustered Pitchers</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: grey;'>Using advanced pitch metric data from BaseballSavant, a KMeans Clustering model is used to accurately group pitchers. Then we compare Batter statistics vs each cluster to gain insight into pitcher preferences and predict future outcomes.  </h4>", unsafe_allow_html=True)
 
 
 #####################
 # Hitter Select Box # ////// needs to be a function with selecting a team
 # /// would like to order select box by hitter ab totals on the year
 #####################
-import re
-import os
 
-team_path = os.path.normpath("teams/LAA/hitter_vs_pitcher/")
+def select_team():
+    
+    teams_path = os.path.normpath("teams/")
+    teams_new = []
 
-# team_path = os.path.abspath("teams/LAA/hitter_vs_pitcher/")
-# team_path = "C:/Users/ajmme/app3/teams/LAA/hitter_vs_pitcher/"
+    for team_folder in os.listdir(teams_path):
+        teams_new.append(team_folder)
+
+    teams_choose = st.selectbox('Choose Team', teams_new)
+    return teams_choose
+
+# needs to have a team_abbrev argument
+
+t_id = select_team()
+hitter_vs_pitcher_path = os.path.normpath(f"teams/{t_id}/hitter_vs_pitcher/")
+
+
 hitters_new = []
 import os
-for filename in os.listdir(team_path):
-#    with open(os.path.join(team_path, filename), 'r') as f: # open in readonly mode
+for filename in os.listdir(hitter_vs_pitcher_path):
     sp = filename.split('.')
     hitters_new.append(sp[0])
 
-      # do your stuff
-#     sp = file.split('.')
-#     hitters_new.append(sp[0])
-
-# st.write(hitters_new)
-
-# hitters = ['Jacob_Lamb','Mike_Trout', 'Shohei_Ohtani',  'Gio_Urshela', 'Hunter_Renfroe', 'Taylor_Ward', 'Anthony_Rendon', 'Luis_Rengifo', 'Brandon_Drury']
 hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 ########################
@@ -70,7 +78,7 @@ hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 
 def open_hitter():
-    with open(f"{team_path}/{hitter_choose}.json") as f:
+    with open(f"{hitter_vs_pitcher_path}/{hitter_choose}.json") as f:
         data_str = f.read()
         data_hitter = json.loads(data_str)  
     return data_hitter
@@ -102,9 +110,9 @@ df_hitter = load_hitter()
 # Load KMeans Clustering Model : loaded_metric_model
 ####################################################
 models_path = os.path.normpath("models/")
+
 def load_metric_model():
     file_metrics = f"{models_path}/kmeans_metric.sav"
-    print(file_metrics)
     lmm = pickle.load(open(file_metrics, 'rb'))
     return lmm
 
