@@ -46,6 +46,9 @@ st.markdown("<h4 style='text-align: center; color: grey;'>Using advanced pitch m
 # Hitter Select Box # ////// needs to be a function with selecting a team
 # /// would like to order select box by hitter ab totals on the year
 #####################
+col01, col02 = st.columns(2)
+teams_path = os.path.normpath("teams/")
+
 
 def select_team():
     
@@ -60,17 +63,38 @@ def select_team():
 
 # needs to have a team_abbrev argument
 
-t_id = select_team()
-hitter_vs_pitcher_path = os.path.normpath(f"teams/{t_id}/hitter_vs_pitcher/")
+# t_id = select_team()
+
+with col01:
+    
+    col_t_id = select_team()
+    hitter_vs_pitcher_path = os.path.normpath(f"teams/{col_t_id}/hitter_vs_pitcher/")
 
 
-hitters_new = []
-import os
-for filename in os.listdir(hitter_vs_pitcher_path):
-    sp = filename.split('.')
-    hitters_new.append(sp[0])
+def select_player():
 
-hitter_choose = st.selectbox('Choose Batter', hitters_new)
+    hitter_vs_pitcher_path = os.path.normpath(f"teams/{col_t_id}/hitter_vs_pitcher/")
+    hitters_new = []
+    
+    for filename in os.listdir(hitter_vs_pitcher_path):
+        sp = filename.split('.')
+        hitters_new.append(sp[0])
+    
+    player_choose = st.selectbox('Choose Player', hitters_new)
+    return  player_choose
+
+
+with col02:
+    hitter_choose = select_player()
+
+
+    # hitters_new = []
+    # import os
+    # for filename in os.listdir(hitter_vs_pitcher_path):
+    #     sp = filename.split('.')
+    #     hitters_new.append(sp[0])
+
+    # hitter_choose = st.selectbox('Choose Batter', hitters_new)
 
 ########################
 # Open Selected Hitter #
@@ -276,16 +300,16 @@ def density():
     b1 = b + a
     p1 = a1/b1
 
-    p25 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1.1
-    p50 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1.2
+    p25 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1
+    p50 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1
 
 
 
 
-    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p25, alternative='less')
-    pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=p50, alternative='less')
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(p25*1000,0)} is:  {round(pval300, 4)*100}%")
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(p50*1000,0)} is: {round(pval333, 4)*100}%")
+    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
+    pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.250, alternative='less')
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(300)} is:  {round(pval300, 4)*100}%")
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(250)} is: {round(pval333, 4)*100}%")
 density()
 
 
