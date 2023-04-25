@@ -34,12 +34,14 @@ from st_aggrid import AgGrid
 
 import statsapi
 
+from dotenv import load_dotenv
+import os
 
 
 # Define postgres connection string
 def init_connection():
     conn_string = psycopg2.connect(
-    database="baseball", user='postgres', password='alec', host='127.0.0.1', port= '5432'
+    database=os.getenv('DATABASE'), user=os.getenv('USER'), password=os.getenv('PASSWORD'), host=os.getenv('HOST'), port=os.getenv('PORT')
     )
     return conn_string
 
@@ -364,15 +366,6 @@ with colsql:
         return choose_table
         
     chosen_sql_data = choose_db()
-
-    def init_connection():
-        conn_string = psycopg2.connect(
-        database='baseball', user='postgres', password='alec', host='127.0.0.1', port= '5432'
-        )
-        return conn_string
-
-    conn = init_connection()
-
 
     def run_query(query):
         with conn.cursor() as cur:
