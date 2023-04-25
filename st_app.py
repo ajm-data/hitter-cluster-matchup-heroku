@@ -1,9 +1,17 @@
-import streamlit as st
+import re
+import os
+from os import path
+import json
 import pickle
+
 import numpy as np
 import pandas as pd
+import pandasql as ps
+from pandasql import sqldf
+
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans,AgglomerativeClustering,DBSCAN,SpectralClustering
@@ -13,24 +21,44 @@ from sklearn.metrics import classification_report, r2_score
 from sklearn import tree
 from sklearn import metrics
 
-import statsapi
-
-from os import path
-
-import json
-
 import scipy.stats as stats
 from scipy.stats import binom, binom_test, binomtest
 from scipy.stats import distributions as dist
 from scipy.stats import beta
 
-import pandasql as ps
-from pandasql import sqldf
+import psycopg2
+from sqlalchemy import create_engine
 
+import streamlit as st
 from st_aggrid import AgGrid
 
-import re
-import os
+import statsapi
+
+
+
+# Define postgres connection string
+def init_connection():
+    conn_string = psycopg2.connect(
+    database="baseball", user='postgres', password='alec', host='127.0.0.1', port= '5432'
+    )
+    return conn_string
+
+conn = init_connection()
+
+# Run query with query argument later in code
+# def run_query(query):
+#     with conn.cursor() as cur:
+#         cur.execute(query)
+#         return cur.fetchall()
+
+def run_query(query):
+    with conn.cursor() as cur:
+        cur.execute(query)
+        columns = cur.description
+        result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
+        return result
+# columns = cursor.description 
+# result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cursor.fetchall()]
 
 #################
 # Web-app title #
@@ -180,53 +208,54 @@ def show_clusters():
     hitter_agg_sum = hitter_clusters.groupby('Cluster').sum()
     hitter_agg_sum['avg'] = hitter_agg_sum['h'] / hitter_agg_sum['ab']
 
-
+    coltab1, coltab2 = st.columns(2)
+    
     tab21, tab22, tab23, tab24, tab25 = st.tabs(['Career vs Pitcher', 'Career vs Cluster', 'Pitcher Search', 'Probable Pitcher', 'Live'])
 
+    with coltab1:
+        with tab21:
+            st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs pitchers in each cluster</h4>", unsafe_allow_html=True)
+            st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
 
-    with tab21:
-        st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs pitchers in each cluster</h4>", unsafe_allow_html=True)
-        st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
-
-        AgGrid(hitter_clusters, height=350, fit_columns_on_grid_load=True)
+            AgGrid(hitter_clusters, height=350, fit_columns_on_grid_load=True)
+            
+            st.markdown("<pstyl e='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
         
-        st.markdown("<pstyl e='text-align: center; color: black;'>Full Screen option in top right of dataframe</p>", unsafe_allow_html=True)
-    
-    with tab22:
-        st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs each cluster</h4>", unsafe_allow_html=True)
+        with tab22:
+            st.markdown("<h4 style='text-align: center; color: black;'>Hitter's career statistics vs each cluster</h4>", unsafe_allow_html=True)
 
-        st.dataframe(hitter_agg_sum)
-        st.markdown("<p style='text-align: center; color: black;'>Sort columns by left-click</p>", unsafe_allow_html=True)
+            st.dataframe(hitter_agg_sum)
+            st.markdown("<p style='text-align: center; color: black;'>Sort columns by left-click</p>", unsafe_allow_html=True)
+    with coltab2:
+        with tab23:
+            # icon("search")
+            # selected = st.text_input("", "Search...")
+            # button_clicked = st.button("OK")
+            # pitcher_last_name = st.text_input('Search by last name', 'pitcher')
+            
+            all_pitchers = pd.read_csv('Named_Clustered_Metric.csv')
+            all_pitchers_df = pd.DataFrame(all_pitchers)
+            all_pitchers_df['full_name'] = all_pitchers_df['first_name'] + ' ' + all_pitchers_df['last_name']
+            all_pitchers_df['full_name'] = all_pitchers_df['full_name'].str.strip()
 
-    with tab23:
-        # icon("search")
-        # selected = st.text_input("", "Search...")
-        # button_clicked = st.button("OK")
-        # pitcher_last_name = st.text_input('Search by last name', 'pitcher')
-        
-        all_pitchers = pd.read_csv('Named_Clustered_Metric.csv')
-        all_pitchers_df = pd.DataFrame(all_pitchers)
-        all_pitchers_df['full_name'] = all_pitchers_df['first_name'] + ' ' + all_pitchers_df['last_name']
-        all_pitchers_df['full_name'] = all_pitchers_df['full_name'].str.strip()
+            all_pitchers_df = all_pitchers_df[['Cluster', 'full_name']]
+            
+            st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
+            AgGrid(all_pitchers_df, height=350, fit_columns_on_grid_load=True)
 
-        all_pitchers_df = all_pitchers_df[['Cluster', 'full_name']]
-        
-        st.text("Click the 'hamburger' icon at the top of a column to search, select, and filter.")
-        AgGrid(all_pitchers_df, height=350, fit_columns_on_grid_load=True)
+        with tab24: 
+            st.write("These are upcoming pitchers, their cluster, and the hitter's stats vs their cluster")
+            from new import prob_pitch_df
+            pp = prob_pitch_df()
+            
+            xtry = pd.merge(pp, hitter_agg_sum, left_on='Cluster', right_index=True)
+            st.dataframe(xtry)
 
-    with tab24: 
-        st.write("These are upcoming pitchers, their cluster, and the hitter's stats vs their cluster")
-        from new import prob_pitch_df
-        pp = prob_pitch_df()
-        
-        xtry = pd.merge(pp, hitter_agg_sum, left_on='Cluster', right_index=True)
-        st.dataframe(xtry)
-
-    with tab25:
-        from new import live_box
-        lb = live_box()
-        st.text('If box-score is empty, no game is currently underway')
-        st.dataframe(lb)
+        with tab25:
+            from new import live_box
+            lb = live_box()
+            st.text('If box-score is empty, no game is currently underway')
+            st.dataframe(lb)
 
 
     return hitter_agg_sum
@@ -304,18 +333,176 @@ def density():
     p50 = (cluster_hit[clusters_choose] / cluster_ab[clusters_choose]) * 1
 
 
+    slider_value = st.slider(f"Choose a batting avg, and see the probability that {hitter_choose}'s avg vs the chosen cluster is greater",
+        0.0, 1.0, .25
+    )
 
 
-    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.3, alternative='less')
+    pval300 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=slider_value, alternative='less')
     pval333 = binom_test(cluster_hit[clusters_choose], cluster_ab[clusters_choose], p=.250, alternative='less')
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(300)} is:  {round(pval300, 4)*100}%")
-    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {round(250)} is: {round(pval333, 4)*100}%")
-density()
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than {int(slider_value*1000)} is: {round(pval300*100)} %")
+    st.write(f"The probability that {hitter_choose}'s avg vs this cluster is greater than 250 is: {round(pval333*100)}%")
 
 
+coldens, colsql = st.columns(2)
+
+with coldens:
+    density()
+
+with colsql:
+
+    def choose_db():
+
+        bb_table = st.radio("Choose which data to acces",
+                ('Completed Game Data', 'Active Player Data'))
+        
+        if bb_table == 'Completed Game Data':
+            choose_table = 'completed_games'
+        else:
+            choose_table = 'active_players'
+        
+        return choose_table
+        
+    chosen_sql_data = choose_db()
+
+    def init_connection():
+        conn_string = psycopg2.connect(
+        database='baseball', user='postgres', password='alec', host='127.0.0.1', port= '5432'
+        )
+        return conn_string
+
+    conn = init_connection()
+
+
+    def run_query(query):
+        with conn.cursor() as cur:
+            cur.execute(query)
+            columns = cur.description
+            result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
+            return result
+        
+    if chosen_sql_data == 'game_data':
+        st.write("Paste SQL code for table information, or use your own query given the table name")
+        raw_code = st.text_area("SELECT column_name, data_type \nFROM information_schema.columns \nWHERE table_schema = 'public' \n\tAND table_name = 'completed_games'")
+
+    else:
+        st.write("Paste SQL code for table information, or use your own query given the table name")
+        raw_code = st.text_area("SELECT column_name, data_type \nFROM information_schema.columns \nWHERE table_schema = 'public' \n\tAND table_name = 'active_players'")
+    
+    with st.form(key='query_form'):
+        # st.write("'\n SELECT * FROM table_name' to view entire table")
+        # raw_code = st.text_area("Copy and paste information schema to see columns names")
+                                
+        submit_code = st.form_submit_button("Execute")
+        
+
+        if submit_code:
+            st.info("Query Subbed")
+            st.code(raw_code)
+            # Results
+            query_results = run_query(raw_code)
+            with st.expander("View Query Data"):
+                st.dataframe(query_results)
+########################################################################
+# columns = cursor.description 
+# result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cursor.fetchall()]
+
+# pprint.pprint(result)
+    # rows = run_query("SELECT * from completed_games")
+    # st.dataframe(rows)
+    # for j in range(0, len(rows)):
+    #     st.write(rows[j])
+##########################################################################
+    # st.write("only available table is 'completed_games'")
+    # with st.form(key='query_form'):
+    #     raw_code = st.text_area("SQL Here")
+    #     submit_code = st.form_submit_button("Execute")
+        
+
+    #     if submit_code:
+    #         st.info("Query Subbed")
+    #         st.code(raw_code)
+    #         # Results
+    #         query_results = run_query(raw_code)
+    #         # with st.expander("Results"):
+    #         st.dataframe(query_results)
+    # Table
+###############################################################################
+
+# Results Layouts
+# col69 = st.columns(1)
+
+# with col69:
+#     if submite_code:
+#         st.info("Query Subbed")
+#         st.code(raw_code)
+
+#         query_results = sql_executor(raw_code)
+#         with st.expander("Results"):
+#             st.write(query_results)
+
+
+
+
+# menu = ['Home', 'About']
+# choice = st.sidebar.selectbox("Menu", menu)
+
+#  if choice == "Home":
+#         st.subheader("HomePage")
+
+
+        
+# else:
+#         st.subheader("About")
+
+
+
+
+def data_2_cols():
+     colviz1, colviz2 = st.columns(2)
+     
+     metric_cols = df_metric.columns 
+
+     with colviz1:
+        with st.expander("Cluster Distribution"):
+            st.header('Distribution of Clusters')
+            cluster_distribution = plt.figure(figsize=(10, 10))
+            sns.set(font_scale = 2)
+            sns.countplot(x='Cluster', data=df_metric, palette ='deep').set(title='Pitcher Clusters')
+            st.pyplot(cluster_distribution)
+    
+     with colviz2: 
+        with st.expander("Cluster Classification"):
+        
+            #  df_metric_tab3_columns = df_metric.columns
+            metric_col3_columns = metric_cols[0:56]
+            df_col3 = df_metric[metric_col3_columns]
+            X_metric = df_col3.drop(['Cluster'],axis=1)
+            y_metric= df_col3[['Cluster']]
+            X_train_metric, X_test_metric, y_train_metric, y_test_metric =train_test_split(X_metric, y_metric, test_size=0.3)
+            
+            kmeans_cluster_metric= DecisionTreeClassifier(criterion="entropy")
+            kmeans_cluster_metric.fit(X_train_metric, y_train_metric)
+            y_pred_metric = kmeans_cluster_metric.predict(X_test_metric)
+            tested_metric = loaded_model.predict(X_test_metric)
+            eval_metric = classification_report(y_test_metric, y_pred_metric, output_dict=True) 
+            eval_metric = pd.DataFrame(eval_metric).T
+
+            st.header('Classification Accuracy')
+            
+            st.dataframe(eval_metric, 800,800)
+
+            # st.dataframe(eval_metric[['precision','f1-score']],400,400)
+            st.text('''Refresh page for different data splits 
+            resulting in different f1-scores''')
+        
+     return colviz1, colviz2 
+
+col_viz = data_2_cols()
+#################################################################
 
 # def data_2_cols():
-#      tab1, tab2 = st.tabs(['Cluster Distribution', 'Model Precision'])
+#      colviz1, colviz2 = st.columns(2)
      
 #      metric_cols = df_metric.columns 
 
@@ -325,14 +512,14 @@ density()
 #     #     st.header('These are the predictors used for our KMeans model')
 #     #     st.write(metric_cols[0:55])
 
-#      with tab1:
+#      with colviz1:
 #         st.header('Distribution of Clusters')
 #         cluster_distribution = plt.figure(figsize=(10, 10))
 #         sns.set(font_scale = 2)
 #         sns.countplot(x='Cluster', data=df_metric, palette ='deep').set(title='Pitcher Clusters')
 #         st.pyplot(cluster_distribution)
      
-#      with tab2: 
+#      with colviz2: 
 #         #  df_metric_tab3_columns = df_metric.columns
 #          metric_col3_columns = metric_cols[0:56]
 #          df_col3 = df_metric[metric_col3_columns]
@@ -353,13 +540,15 @@ density()
 #          st.text('''Refresh page for different data splits 
 #         resulting in different f1-scores''')
      
-#      return tab1, tab2 
+#      return colviz1, colviz2 
 
 # col_viz = data_2_cols()
 
 
-# from new import prob_pitch
+# # from new import prob_pitch
 
-# prob_pitch()
+# # prob_pitch()
 
-# st.write(probable_pitcher)
+# # st.write(probable_pitcher)
+
+##################################################################
