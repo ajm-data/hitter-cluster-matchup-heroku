@@ -37,21 +37,19 @@ import statsapi
 from dotenv import load_dotenv
 import os
 
+load_dotenv()
 
-# Define postgres connection string
 def init_connection():
-    conn_string = psycopg2.connect(
-    database=os.getenv('DATABASE'), user=os.getenv('USER'), password=os.getenv('PASSWORD'), host=os.getenv('HOST'), port=os.getenv('PORT')
-    )
-    return conn_string
+    connection = psycopg2.connect(
+        database = os.getenv('DATABASE'),
+        user = os.getenv('USER'),
+        password = os.getenv('PASSWORD'),
+        host = os.getenv('HOST'),
+        port = os.getenv('PORT'))
+    return connection
 
 conn = init_connection()
 
-# Run query with query argument later in code
-# def run_query(query):
-#     with conn.cursor() as cur:
-#         cur.execute(query)
-#         return cur.fetchall()
 
 def run_query(query):
     with conn.cursor() as cur:
@@ -59,8 +57,6 @@ def run_query(query):
         columns = cur.description
         result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
         return result
-# columns = cursor.description 
-# result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cursor.fetchall()]
 
 #################
 # Web-app title #
@@ -374,17 +370,17 @@ with colsql:
             result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
             return result
         
-    if chosen_sql_data == 'game_data':
-        st.write("Paste SQL code for table information, or use your own query given the table name")
-        raw_code = st.text_area("SELECT column_name, data_type \nFROM information_schema.columns \nWHERE table_schema = 'public' \n\tAND table_name = 'completed_games'")
+    if chosen_sql_data == 'active_players':
+        st.write("copy SELECT * FROM active_players to see the table and begin writing queries")
+        # raw_code = st.text_area("SELECT * FROM active_players")
 
     else:
-        st.write("Paste SQL code for table information, or use your own query given the table name")
-        raw_code = st.text_area("SELECT column_name, data_type \nFROM information_schema.columns \nWHERE table_schema = 'public' \n\tAND table_name = 'active_players'")
+        st.write("copy SELECT * FROM completed_games to see the table and begin writing queries")
+        # raw_code = st.text_area("SELECT * FROM completed_games")
     
     with st.form(key='query_form'):
         # st.write("'\n SELECT * FROM table_name' to view entire table")
-        # raw_code = st.text_area("Copy and paste information schema to see columns names")
+        raw_code = st.text_area("begin writing queries")
                                 
         submit_code = st.form_submit_button("Execute")
         
