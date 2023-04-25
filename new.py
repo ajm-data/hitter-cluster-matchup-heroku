@@ -106,6 +106,10 @@ def live_box():
     return angels_df
 
 
+tod = statsapi.schedule(start_date='4/1/2023', end_date='4/29/2023')
+
+# for i in range(0, len(tod)):
+#     print(tod[i]['away_id'])
 
 # xlv = live_box()
 # print(xlv)
@@ -115,8 +119,8 @@ def live_box():
 # x = statsapi.schedule(start_date='4/19/2023',end_date='4/25/2023',team=108)
 # print(x[3]['away_probable_pitcher'])
 
-xydf = prob_pitch()
-print(xydf)
+# xydf = prob_pitch()
+# print(xydf)
 # print(prob_pitch())
 
 
