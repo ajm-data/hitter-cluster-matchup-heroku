@@ -41,17 +41,18 @@ load_dotenv()
 
 def init_connection():
     connection = psycopg2.connect(
-        database = os.getenv('DATABASE'),
-        user = os.getenv('USER'),
-        password = os.getenv('PASSWORD'),
-        host = os.getenv('HOST'),
-        port = os.getenv('PORT'))
+        database = os.getenv("DATABASE"),
+        user = os.getenv("USER"),
+        password = os.getenv("PASSWORD"),
+        host = os.getenv("HOST"),
+        port = os.getenv("PORT"))
     return connection
 
-conn = init_connection()
+# conn = init_connection()
 
 
 def run_query(query):
+    conn = init_connection()
     with conn.cursor() as cur:
         cur.execute(query)
         columns = cur.description
@@ -392,58 +393,6 @@ with colsql:
             query_results = run_query(raw_code)
             with st.expander("View Query Data"):
                 st.dataframe(query_results)
-########################################################################
-# columns = cursor.description 
-# result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cursor.fetchall()]
-
-# pprint.pprint(result)
-    # rows = run_query("SELECT * from completed_games")
-    # st.dataframe(rows)
-    # for j in range(0, len(rows)):
-    #     st.write(rows[j])
-##########################################################################
-    # st.write("only available table is 'completed_games'")
-    # with st.form(key='query_form'):
-    #     raw_code = st.text_area("SQL Here")
-    #     submit_code = st.form_submit_button("Execute")
-        
-
-    #     if submit_code:
-    #         st.info("Query Subbed")
-    #         st.code(raw_code)
-    #         # Results
-    #         query_results = run_query(raw_code)
-    #         # with st.expander("Results"):
-    #         st.dataframe(query_results)
-    # Table
-###############################################################################
-
-# Results Layouts
-# col69 = st.columns(1)
-
-# with col69:
-#     if submite_code:
-#         st.info("Query Subbed")
-#         st.code(raw_code)
-
-#         query_results = sql_executor(raw_code)
-#         with st.expander("Results"):
-#             st.write(query_results)
-
-
-
-
-# menu = ['Home', 'About']
-# choice = st.sidebar.selectbox("Menu", menu)
-
-#  if choice == "Home":
-#         st.subheader("HomePage")
-
-
-        
-# else:
-#         st.subheader("About")
-
 
 
 
@@ -488,56 +437,3 @@ def data_2_cols():
      return colviz1, colviz2 
 
 col_viz = data_2_cols()
-#################################################################
-
-# def data_2_cols():
-#      colviz1, colviz2 = st.columns(2)
-     
-#      metric_cols = df_metric.columns 
-
-#     #  with col1:
-#     #     # viz_cols = df_metric.columns
-#     #     # viz_cole = metric_cols[0:55]
-#     #     st.header('These are the predictors used for our KMeans model')
-#     #     st.write(metric_cols[0:55])
-
-#      with colviz1:
-#         st.header('Distribution of Clusters')
-#         cluster_distribution = plt.figure(figsize=(10, 10))
-#         sns.set(font_scale = 2)
-#         sns.countplot(x='Cluster', data=df_metric, palette ='deep').set(title='Pitcher Clusters')
-#         st.pyplot(cluster_distribution)
-     
-#      with colviz2: 
-#         #  df_metric_tab3_columns = df_metric.columns
-#          metric_col3_columns = metric_cols[0:56]
-#          df_col3 = df_metric[metric_col3_columns]
-#          X_metric = df_col3.drop(['Cluster'],axis=1)
-#          y_metric= df_col3[['Cluster']]
-#          X_train_metric, X_test_metric, y_train_metric, y_test_metric =train_test_split(X_metric, y_metric, test_size=0.3)
-         
-#          kmeans_cluster_metric= DecisionTreeClassifier(criterion="entropy")
-#          kmeans_cluster_metric.fit(X_train_metric, y_train_metric)
-#          y_pred_metric = kmeans_cluster_metric.predict(X_test_metric)
-#          tested_metric = loaded_model.predict(X_test_metric)
-#          eval_metric = classification_report(y_test_metric, y_pred_metric, output_dict=True) 
-#          eval_metric = pd.DataFrame(eval_metric).T
-
-#          st.header('Classification Accuracy')
-        
-#          st.dataframe(eval_metric[['precision','f1-score']],400,400)
-#          st.text('''Refresh page for different data splits 
-#         resulting in different f1-scores''')
-     
-#      return colviz1, colviz2 
-
-# col_viz = data_2_cols()
-
-
-# # from new import prob_pitch
-
-# # prob_pitch()
-
-# # st.write(probable_pitcher)
-
-##################################################################
