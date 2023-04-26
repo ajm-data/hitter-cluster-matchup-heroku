@@ -48,17 +48,6 @@ def init_connection():
         port = os.getenv("PORT"))
     return connection
 
-conn = init_connection()
-
-
-def run_query(query):
-    conn = init_connection()
-    with conn.cursor() as cur:
-        cur.execute(query)
-        columns = cur.description
-        result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
-        return result
-
 #################
 # Web-app title #
 #################
@@ -350,34 +339,35 @@ with coldens:
 
 with colsql:
 
-    def choose_db():
+    # def choose_db():
 
-        bb_table = st.radio("Choose which data to acces",
-                ('Completed Game Data', 'Active Player Data'))
+    #     bb_table = st.radio("Choose which data to acces",
+    #             ('Completed Game Data', 'Active Player Data'))
         
-        if bb_table == 'Completed Game Data':
-            choose_table = 'completed_games'
-        else:
-            choose_table = 'active_players'
+    #     if bb_table == 'Completed Game Data':
+    #         choose_table = 'completed_games'
+    #     else:
+    #         choose_table = 'active_players'
         
-        return choose_table
+    #     return choose_table
         
-    chosen_sql_data = choose_db()
+    # chosen_sql_data = choose_db()
 
     def run_query(query):
+        conn = init_connection()
         with conn.cursor() as cur:
             cur.execute(query)
             columns = cur.description
             result = [{columns[index][0]:column for index, column in enumerate(value)} for value in cur.fetchall()]
             return result
         
-    if chosen_sql_data == 'active_players':
-        st.write("copy SELECT * FROM active_players to see the table and begin writing queries")
-        # raw_code = st.text_area("SELECT * FROM active_players")
+    # if chosen_sql_data == 'active_players':
+    #     st.write("copy SELECT * FROM active_players to see the table and begin writing queries")
+    #     # raw_code = st.text_area("SELECT * FROM active_players")
 
-    else:
-        st.write("copy SELECT * FROM completed_games to see the table and begin writing queries")
-        # raw_code = st.text_area("SELECT * FROM completed_games")
+    # else:
+    #     st.write("copy SELECT * FROM completed_games to see the table and begin writing queries")
+    #     # raw_code = st.text_area("SELECT * FROM completed_games")
     
     with st.form(key='query_form'):
         # st.write("'\n SELECT * FROM table_name' to view entire table")
