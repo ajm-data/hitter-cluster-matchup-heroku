@@ -48,7 +48,7 @@ def init_connection():
         port = os.getenv("PORT"))
     return connection
 
-# conn = init_connection()
+conn = init_connection()
 
 
 def run_query(query):
